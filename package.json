@@ -8,7 +8,7 @@
     "start": "tsc && node --loader ts-node/esm src/index.ts",
     "start:service:all": "pm2 start pnpm --name=\"all\" --restart-delay=3000 --max-restarts=10 -- run start:all",
     "stop:service:all": "pm2 stop all",
-    "postinstall": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1"
+    "postinstall": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 PLAYWRIGHT_SKIP_DEPS_INSTALL=1"
   },
   "dependencies": {
     "@ai16z/adapter-postgres": "v0.1.4-alpha.3",
@@ -34,7 +34,10 @@
   },
   "pnpm": {
     "overrides": {
-      "onnxruntime-node": "^1.20.0"
+      "onnxruntime-node": "^1.20.0",
+      "@ai16z/plugin-node": {
+        "postinstall": "echo 'Skipping playwright installation'"
+      }
     }
   },
   "devDependencies": {
@@ -43,6 +46,7 @@
     "typescript": "^5.6.3"
   },
   "env": {
-    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1",
+    "PLAYWRIGHT_SKIP_DEPS_INSTALL": "1"
   }
 }
