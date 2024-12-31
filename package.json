@@ -16,8 +16,6 @@
     "@ai16z/adapter-sqlite": "0.1.4-alpha.3",
     "@ai16z/client-auto": "0.1.4-alpha.3",
     "@ai16z/client-direct": "0.1.4-alpha.3",
-    "@ai16z/client-discord": "0.1.4-alpha.3",
-    "@ai16z/client-telegram": "0.1.4-alpha.3",
     "@ai16z/client-twitter": "0.1.4-alpha.3",
     "@ai16z/eliza": "0.1.4-alpha.3",
     "@ai16z/plugin-bootstrap": "0.1.4-alpha.3",
