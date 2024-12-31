@@ -38,4 +38,4 @@ COPY . .
 EXPOSE 3000
 
 # Set up pm2 to run your application in production mode
-CMD ["pnpm", "start","--non-interactive","--character='characters/eliza.character.json'"]
+CMD ["pnpm", "start","--non-interactive","--character='characters/drsoon.character.json'"]
