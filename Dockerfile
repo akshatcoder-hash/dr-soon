@@ -1,37 +1,41 @@
-FROM node:22.6.0-slim
+# Use an official Node.js runtime as the base image
+FROM node:23.3.0-slim
 
-# Set Playwright skip flags globally
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
-    PLAYWRIGHT_SKIP_DEPS_INSTALL=1
 
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y \
+# Install necessary dependencies (glibc, gcc, make, etc.)
+RUN apt-get update && apt-get install -y \
+    git \
     python3 \
-    make \
+    gcc \
     g++ \
+    make \
+    pkg-config \
+    libtool \
+    autoconf \
+    automake \
+    libc6 \
+    libc6-dev \
     curl \
-    gnupg \
+    tar \
     && rm -rf /var/lib/apt/lists/*
 
-# Install specific pnpm version
-RUN npm install -g pnpm@9.15.2
+# Install pnpm globally
+RUN npm install -g pnpm
 
-# Copy package files
-COPY package.json ./
+# Set the working directory in the container
+WORKDIR /app
 
-# Install dependencies with specific flags for Playwright
-RUN pnpm install \
-    && pnpm rebuild \
-    && pnpm store prune
+# Copy package.json and pnpm-lock.yaml
+COPY package.json pnpm-lock.yaml ./
 
-# Copy application code
+# Install the app's dependencies using pnpm
+RUN pnpm install --frozen-lockfile
+
+# Copy the rest of the application code
 COPY . .
 
-# Copy environment variables
-COPY .env .
+# Expose the port the app will run on (you can modify this if needed)
+EXPOSE 3000
 
-# Start command
-CMD ["pnpm", "start", "--character=characters/drsoon.character.json"]
+# Set up pm2 to run your application in production mode
+CMD ["pnpm", "start","--non-interactive","--character='characters/eliza.character.json'"]

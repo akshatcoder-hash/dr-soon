@@ -1,7 +1,9 @@
 import { PostgresDatabaseAdapter } from "@ai16z/adapter-postgres";
 import { SqliteDatabaseAdapter } from "@ai16z/adapter-sqlite";
 import { DirectClientInterface } from "@ai16z/client-direct";
+import { DiscordClientInterface } from "@ai16z/client-discord";
 import { AutoClientInterface } from "@ai16z/client-auto";
+import { TelegramClientInterface } from "@ai16z/client-telegram";
 import { TwitterClientInterface } from "@ai16z/client-twitter";
 import {
   DbCacheAdapter,
@@ -171,6 +173,15 @@ export async function initializeClients(
     if (autoClient) clients.push(autoClient);
   }
 
+  if (clientTypes.includes("discord")) {
+    clients.push(await DiscordClientInterface.start(runtime));
+  }
+
+  if (clientTypes.includes("telegram")) {
+    const telegramClient = await TelegramClientInterface.start(runtime);
+    if (telegramClient) clients.push(telegramClient);
+  }
+
   if (clientTypes.includes("twitter")) {
     const twitterClients = await TwitterClientInterface.start(runtime);
     clients.push(twitterClients);
@@ -267,6 +278,9 @@ async function startAgent(character: Character, directClient: DirectClient) {
   }
 }
 
+let rl: readline.Interface;
+let isRlActive = true; 
+
 const startAgents = async () => {
   const directClient = await DirectClientInterface.start();
   const args = parseArguments();
@@ -287,12 +301,40 @@ const startAgents = async () => {
     elizaLogger.error("Error starting agents:", error);
   }
 
+  rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  const cleanup = () => {
+    if (isRlActive) {
+      isRlActive = false;
+      rl.close();
+    }
+    process.exit(0);
+  };
+
+  // Handle various termination signals
+  process.on('SIGINT', cleanup);
+  process.on('SIGTERM', cleanup);
+  process.on('SIGQUIT', cleanup);
+
   function chat() {
     const agentId = characters[0].name ?? "Agent";
+    if (!isRlActive) {
+      elizaLogger.error("Readline interface is closed");
+      process.exit(1);
+      return;
+    }
     rl.question("You: ", async (input) => {
-      await handleUserInput(input, agentId);
-      if (input.toLowerCase() !== "exit") {
-        chat(); // Loop back to ask another question
+      try {
+        await handleUserInput(input, agentId);
+        if (input.toLowerCase() !== "exit" && isRlActive) {
+          chat(); // Continue chat only if readline is still open
+        }
+      } catch (error) {
+        elizaLogger.error("Error in chat:", error);
+        cleanup();
       }
     });
   }
@@ -301,24 +343,12 @@ const startAgents = async () => {
   chat();
 };
 
-startAgents().catch((error) => {
-  elizaLogger.error("Unhandled error in startAgents:", error);
-  process.exit(1); // Exit the process after logging
-});
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-rl.on("SIGINT", () => {
-  rl.close();
-  process.exit(0);
-});
-
 async function handleUserInput(input, agentId) {
   if (input.toLowerCase() === "exit") {
-    rl.close();
+    if (isRlActive) {
+      isRlActive = false;
+      rl.close();
+    }
     process.exit(0);
     return;
   }
@@ -345,3 +375,8 @@ async function handleUserInput(input, agentId) {
     console.error("Error fetching response:", error);
   }
 }
+
+startAgents().catch((error) => {
+  elizaLogger.error("Unhandled error in startAgents:", error);
+  process.exit(1); // Exit the process after logging
+});
