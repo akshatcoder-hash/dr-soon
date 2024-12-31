@@ -8,7 +8,8 @@
     "start": "tsc && node --loader ts-node/esm src/index.ts",
     "start:service:all": "pm2 start pnpm --name=\"all\" --restart-delay=3000 --max-restarts=10 -- run start:all",
     "stop:service:all": "pm2 stop all",
-    "postinstall": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 PLAYWRIGHT_SKIP_DEPS_INSTALL=1"
+    "postinstall": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 PLAYWRIGHT_SKIP_DEPS_INSTALL=1",
+    "clean": "rm -rf node_modules .pnpm-store dist"
   },
   "dependencies": {
     "@ai16z/adapter-postgres": "0.1.4-alpha.3",
@@ -35,7 +36,8 @@
   "pnpm": {
     "overrides": {
       "onnxruntime-node": "^1.20.0",
-      "@ai16z/plugin-node@*": "v0.1.4-alpha.3"
+      "@ai16z/plugin-node@*": "v0.1.4-alpha.3",
+      "@ai16z/eliza": "v0.1.4-alpha.3"
     }
   },
   "devDependencies": {
