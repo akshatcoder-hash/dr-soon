@@ -1,19 +1,37 @@
-FROM node:20-alpine
+FROM node:22.6.0-slim
+
+# Set Playwright skip flags globally
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+    PLAYWRIGHT_SKIP_DEPS_INSTALL=1
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    curl \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install specific pnpm version
-RUN npm install -g pnpm@9.5.0
+RUN npm install -g pnpm@9.15.2
 
-# Use pnpm to install dependencies
-COPY pnpm-lock.yaml ./
-RUN pnpm install
+# Copy package files
+COPY package.json ./
 
+# Install dependencies with specific flags for Playwright
+RUN pnpm install \
+    && pnpm rebuild \
+    && pnpm store prune
+
+# Copy application code
 COPY . .
 
+# Copy environment variables
 COPY .env .
 
-# Updated command with the character parameter
-CMD ["pnpm", "start", "--character=characters/dukeofducats.character.json"]
+# Start command
+CMD ["pnpm", "start", "--character=characters/drsoon.character.json"]
