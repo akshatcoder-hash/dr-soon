@@ -6,6 +6,7 @@ settings:
 
 overrides:
   onnxruntime-node: ^1.20.0
+  '@ai16z/plugin-node@*': v0.1.4-alpha.3
 
 importers:
 
