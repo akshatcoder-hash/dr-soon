@@ -2,7 +2,7 @@
     "name": "Dr. Soon",
     "plugins": [],
     "clients": ["twitter"],
-    "modelProvider": "grok",
+    "modelProvider": "openai",
     "settings": {
       "secrets": {},
       "voice": {
